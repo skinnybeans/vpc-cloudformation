@@ -220,75 +220,78 @@ Resources:
 #
 # Public route table
 #
-  routesPublic:
+  routeTablePublic:
     Type: AWS::EC2::RouteTable
     Properties: 
       VpcId: !Ref customVPC
       Tags:
         - Key: Name
-          Value: routes-public
+          Value: route-table-public
+
+
+
 #
 # Application route tables
 #
 
-  routesAppA:
+  routeTableAppA:
     Type: AWS::EC2::RouteTable
     Properties: 
       VpcId: !Ref customVPC
       Tags:
         - Key: Name
-          Value: routes-app-a
+          Value: route-table-app-a
 
-  routesAppB:
+  routeTableAppB:
     Type: AWS::EC2::RouteTable
     Properties: 
       VpcId: !Ref customVPC
       Tags:
         - Key: Name
-          Value: routes-app-b
+          Value: route-table-app-b
 
-  routesAppC:
+  routeTableAppC:
     Type: AWS::EC2::RouteTable
     Properties: 
       VpcId: !Ref customVPC
       Tags:
         - Key: Name
-          Value: routes-app-c
+          Value: route-table-app-c
 
 #
 # Data route tables
 #
-  routesDataA:
+  routeTableDataA:
     Type: AWS::EC2::RouteTable
     Properties: 
       VpcId: !Ref customVPC
       Tags:
         - Key: Name
-          Value: routes-data-a
+          Value: route-table-data-a
 
-  routesDataB:
+  routeTableDataB:
     Type: AWS::EC2::RouteTable
     Properties: 
       VpcId: !Ref customVPC
       Tags:
         - Key: Name
-          Value: routes-data-b
+          Value: route-table-data-b
 
-  routesDataC:
+  routeTableDataC:
     Type: AWS::EC2::RouteTable
     Properties: 
       VpcId: !Ref customVPC
       Tags:
         - Key: Name
-          Value: routes-data-c
+          Value: route-table-data-c
 
 #
 # NAT route tables
 #
-  routesNatA:
+  routeTableNat:
     Type: AWS::EC2::RouteTable
     Properties: 
       VpcId: !Ref customVPC
       Tags:
         - Key: Name
-          Value: routes-nat-a
+          Value: route-table-nat
