@@ -1,0 +1,294 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Resources:
+  customVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/19
+#
+# Public subnets
+#
+  subnetPublicA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: customVPC
+      CidrBlock: 10.0.0.0/23
+      AvailabilityZone: "ap-southeast-2a"
+      Tags:
+      - Key: Name
+        Value: subnet-public-a
+
+  subnetPublicB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: customVPC
+      CidrBlock: 10.0.2.0/23
+      AvailabilityZone: "ap-southeast-2b"
+      Tags:
+      - Key: Name
+        Value: subnet-public-b
+
+  subnetPublicC:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: customVPC
+      CidrBlock: 10.0.4.0/23
+      AvailabilityZone: "ap-southeast-2c"
+      Tags:
+      - Key: Name
+        Value: subnet-public-c
+#
+# Appliction subnets
+#
+
+  subnetAppA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: customVPC
+      CidrBlock: 10.0.6.0/23
+      AvailabilityZone: "ap-southeast-2a"
+      Tags:
+      - Key: Name
+        Value: subnet-app-a
+
+  subnetAppB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: customVPC
+      CidrBlock: 10.0.8.0/23
+      AvailabilityZone: "ap-southeast-2b"
+      Tags:
+      - Key: Name
+        Value: subnet-app-b
+
+  subnetAppC:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: customVPC
+      CidrBlock: 10.0.10.0/23
+      AvailabilityZone: "ap-southeast-2c"
+      Tags:
+      - Key: Name
+        Value: subnet-app-c
+#
+# Data subnets
+#
+  subnetDataA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: customVPC
+      CidrBlock: 10.0.12.0/23
+      AvailabilityZone: "ap-southeast-2a"
+      Tags:
+      - Key: Name
+        Value: subnet-data-a
+
+  subnetDataB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: customVPC
+      CidrBlock: 10.0.14.0/23
+      AvailabilityZone: "ap-southeast-2b"
+      Tags:
+      - Key: Name
+        Value: subnet-data-b
+
+  subnetDataC:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: customVPC
+      CidrBlock: 10.0.16.0/23
+      AvailabilityZone: "ap-southeast-2c"
+      Tags:
+      - Key: Name
+        Value: subnet-data-c
+
+#
+# NAT subnets
+#
+  subnetNatA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: customVPC
+      CidrBlock: 10.0.18.0/28
+      AvailabilityZone: "ap-southeast-2a"
+      Tags:
+      - Key: Name
+        Value: subnet-nat-a
+
+  subnetNatB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: customVPC
+      CidrBlock: 10.0.18.16/28
+      AvailabilityZone: "ap-southeast-2b"
+      Tags:
+      - Key: Name
+        Value: subnet-nat-b
+
+  subnetNatC:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: customVPC
+      CidrBlock: 10.0.18.32/28
+      AvailabilityZone: "ap-southeast-2c"
+      Tags:
+      - Key: Name
+        Value: subnet-nat-c
+
+#
+# Internet gateway
+#
+
+  internetGatewayCustom:
+    Type: AWS::EC2::InternetGateway
+    Properties: 
+      Tags:
+        - Key: Name
+          Value: igw-custom
+
+  attachInternetGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties: 
+      InternetGatewayId: !Ref internetGatewayCustom
+      VpcId: !Ref customVPC
+
+#
+# Elastic IPs for NAT gateways
+#
+
+  elasticIPNatA:
+    Type: AWS::EC2::EIP
+    DependsOn: attachInternetGateway
+    Properties:
+      Domain: !Ref customVPC
+
+  elasticIPNatB:
+    Type: AWS::EC2::EIP
+    DependsOn: attachInternetGateway
+    Properties:
+      Domain: !Ref customVPC
+
+  elasticIPNatC:
+    Type: AWS::EC2::EIP
+    DependsOn: attachInternetGateway
+    Properties:
+      Domain: !Ref customVPC
+
+#
+# NAT gateways
+#
+
+  natGatewayA:
+    Type: AWS::EC2::NatGateway
+    Properties: 
+      AllocationId: !GetAtt elasticIPNatA.AllocationId
+      SubnetId: !Ref subnetNatA
+      Tags: 
+        - Key: Name
+          Value: nat-gateway-a
+
+  natGatewayB:
+    Type: AWS::EC2::NatGateway
+    Properties: 
+      AllocationId: !GetAtt elasticIPNatB.AllocationId
+      SubnetId: !Ref subnetNatB
+      Tags: 
+        - Key: Name
+          Value: nat-gateway-b
+
+  natGatewayC:
+    Type: AWS::EC2::NatGateway
+    Properties: 
+      AllocationId: !GetAtt elasticIPNatC.AllocationId
+      SubnetId: !Ref subnetNatC
+      Tags: 
+        - Key: Name
+          Value: nat-gateway-c
+
+#
+# Public route table
+#
+  routesPublic:
+    Type: AWS::EC2::RouteTable
+    Properties: 
+      VpcId: !Ref customVPC
+      Tags:
+        - Key: Name
+          Value: routes-public
+#
+# Application route tables
+#
+
+  routesAppA:
+    Type: AWS::EC2::RouteTable
+    Properties: 
+      VpcId: !Ref customVPC
+      Tags:
+        - Key: Name
+          Value: routes-app-a
+
+  routesAppB:
+    Type: AWS::EC2::RouteTable
+    Properties: 
+      VpcId: !Ref customVPC
+      Tags:
+        - Key: Name
+          Value: routes-app-b
+
+  routesAppC:
+    Type: AWS::EC2::RouteTable
+    Properties: 
+      VpcId: !Ref customVPC
+      Tags:
+        - Key: Name
+          Value: routes-app-c
+
+#
+# Data route tables
+#
+  routesDataA:
+    Type: AWS::EC2::RouteTable
+    Properties: 
+      VpcId: !Ref customVPC
+      Tags:
+        - Key: Name
+          Value: routes-data-a
+
+  routesDataB:
+    Type: AWS::EC2::RouteTable
+    Properties: 
+      VpcId: !Ref customVPC
+      Tags:
+        - Key: Name
+          Value: routes-data-b
+
+  routesDataC:
+    Type: AWS::EC2::RouteTable
+    Properties: 
+      VpcId: !Ref customVPC
+      Tags:
+        - Key: Name
+          Value: routes-data-c
+
+#
+# NAT route tables
+#
+  routesNatA:
+    Type: AWS::EC2::RouteTable
+    Properties: 
+      VpcId: !Ref customVPC
+      Tags:
+        - Key: Name
+          Value: routes-nat-a
