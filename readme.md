@@ -1,4 +1,8 @@
-# VPC layout
+# VPCs
+
+Started this as and exercise to layout and create a VPC from scratch using cloudformation.
+
+As the layout of this kind of thing is somewhat complicated, the readme acts as a design doc to build against.
 
 ## VPC cidr
 
