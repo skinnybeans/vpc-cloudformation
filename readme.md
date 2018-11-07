@@ -219,17 +219,6 @@ Destination | Target |
 
 ## NACLs
 
-out
-- 123 ntp
-- 80 http
-- 443 https
-- 8080 http
-
-in
-- 80
-- 443
-- 8080
-
 ### Public subnet
 
 - Prevent subnets that shouldn't be communicating directly with the public tier.
