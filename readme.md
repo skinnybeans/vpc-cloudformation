@@ -158,18 +158,21 @@ Destination | Target |
 Each applications subnet will route to the NAT gateway it the corresponding AZ.
 
 Name: app-table-a
+
 Destination | Target |
 | --- | --- |
 | 10.0.0.0/19 | local |
 | 0.0.0.0/0 | nat-gateway-a |
 
 Name: app-table-b
+
 Destination | Target |
 | --- | --- |
 | 10.0.0.0/19 | local |
 | 0.0.0.0/0 | nat-gateway-b |
 
 Name: app-table-c
+
 Destination | Target |
 | --- | --- |
 | 10.0.0.0/19 | local |
@@ -180,18 +183,21 @@ Destination | Target |
 Each data subnet will route to the NAT gateway it the corresponding AZ.
 
 Name: data-table-a
+
 Destination | Target |
 | --- | --- |
 | 10.0.0.0/19 | local |
 | 0.0.0.0/0 | nat-gateway-a |
 
 Name: data-table-b
+
 Destination | Target |
 | --- | --- |
 | 10.0.0.0/19 | local |
 | 0.0.0.0/0 | nat-gateway-b |
 
 Name: data-table-c
+
 Destination | Target |
 | --- | --- |
 | 10.0.0.0/19 | local |
