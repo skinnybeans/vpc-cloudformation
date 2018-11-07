@@ -228,7 +228,31 @@ Resources:
         - Key: Name
           Value: route-table-public
 
+  routePublicInternetGateway:
+    Type: AWS::EC2::Route
+    DependsOn: attachInternetGateway
+    Properties: 
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref internetGatewayCustom
+      RouteTableId: !Ref routeTablePublic
 
+  subnetRoutePublicA:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties: 
+      RouteTableId: !Ref routeTablePublic
+      SubnetId: !Ref subnetPublicA
+
+  subnetRoutePublicB:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties: 
+      RouteTableId: !Ref routeTablePublic
+      SubnetId: !Ref subnetPublicB
+
+  subnetRoutePublicC:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties: 
+      RouteTableId: !Ref routeTablePublic
+      SubnetId: !Ref subnetPublicC
 
 #
 # Application route tables
@@ -242,6 +266,19 @@ Resources:
         - Key: Name
           Value: route-table-app-a
 
+  routeAppNatGatewayA:
+    Type: AWS::EC2::Route
+    Properties: 
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref natGatewayA
+      RouteTableId: !Ref routeTableAppA
+
+  subnetRouteAppA:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties: 
+      RouteTableId: !Ref routeTableAppA
+      SubnetId: !Ref subnetAppA
+
   routeTableAppB:
     Type: AWS::EC2::RouteTable
     Properties: 
@@ -250,6 +287,19 @@ Resources:
         - Key: Name
           Value: route-table-app-b
 
+  routeAppNatGatewayB:
+    Type: AWS::EC2::Route
+    Properties: 
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref natGatewayB
+      RouteTableId: !Ref routeTableAppB
+
+  subnetRouteAppB:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties: 
+      RouteTableId: !Ref routeTableAppB
+      SubnetId: !Ref subnetAppB
+
   routeTableAppC:
     Type: AWS::EC2::RouteTable
     Properties: 
@@ -257,6 +307,19 @@ Resources:
       Tags:
         - Key: Name
           Value: route-table-app-c
+
+  routeAppNatGatewayC:
+    Type: AWS::EC2::Route
+    Properties: 
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref natGatewayC
+      RouteTableId: !Ref routeTableAppC
+
+  subnetRouteAppC:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties: 
+      RouteTableId: !Ref routeTableAppC
+      SubnetId: !Ref subnetAppC
 
 #
 # Data route tables
@@ -269,6 +332,19 @@ Resources:
         - Key: Name
           Value: route-table-data-a
 
+  routeDataNatGatewayA:
+    Type: AWS::EC2::Route
+    Properties: 
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref natGatewayA
+      RouteTableId: !Ref routeTableDataA
+
+  subnetRouteDataA:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties: 
+      RouteTableId: !Ref routeTableDataA
+      SubnetId: !Ref subnetDataA
+
   routeTableDataB:
     Type: AWS::EC2::RouteTable
     Properties: 
@@ -277,6 +353,19 @@ Resources:
         - Key: Name
           Value: route-table-data-b
 
+  routeDataNatGatewayB:
+    Type: AWS::EC2::Route
+    Properties: 
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref natGatewayB
+      RouteTableId: !Ref routeTableDataB
+
+  subnetRouteDataB:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties: 
+      RouteTableId: !Ref routeTableDataB
+      SubnetId: !Ref subnetDataB
+
   routeTableDataC:
     Type: AWS::EC2::RouteTable
     Properties: 
@@ -284,6 +373,19 @@ Resources:
       Tags:
         - Key: Name
           Value: route-table-data-c
+
+  routeDataNatGatewayC:
+    Type: AWS::EC2::Route
+    Properties: 
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref natGatewayC
+      RouteTableId: !Ref routeTableDataC
+
+  subnetRouteDataC:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties: 
+      RouteTableId: !Ref routeTableDataC
+      SubnetId: !Ref subnetDataC
 
 #
 # NAT route tables
@@ -295,3 +397,29 @@ Resources:
       Tags:
         - Key: Name
           Value: route-table-nat
+
+  routeNatInternetGateway:
+    Type: AWS::EC2::Route
+    DependsOn: attachInternetGateway
+    Properties: 
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref internetGatewayCustom
+      RouteTableId: !Ref routeTableNat
+
+  subnetRouteNatA:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties: 
+      RouteTableId: !Ref routeTableNat
+      SubnetId: !Ref subnetNatA
+
+  subnetRouteNatB:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties: 
+      RouteTableId: !Ref routeTableNat
+      SubnetId: !Ref subnetNatB
+
+  subnetRouteNatC:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties: 
+      RouteTableId: !Ref routeTableNat
+      SubnetId: !Ref subnetNatC
