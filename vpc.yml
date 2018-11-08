@@ -1,4 +1,32 @@
 AWSTemplateFormatVersion: '2010-09-09'
+
+############
+# Mappings #
+############
+
+Mappings:
+  subnetCidrMap:
+    public:
+      subnetA: "10.0.0.0/23"
+      subnetB: "10.0.2.0/23"
+      subnetC: "10.0.4.0/23"
+    app:
+      subnetA: "10.0.6.0/23"
+      subnetB: "10.0.8.0/23"
+      subnetC: "10.0.10.0/23"
+    data:
+      subnetA: "10.0.12.0/23"
+      subnetB: "10.0.14.0/23"
+      subnetC: "10.0.16.0/23"
+    nat:
+      subnetA: "10.0.18.0/28"
+      subnetB: "10.0.18.16/28"
+      subnetC: "10.0.18.32/28"
+
+#############
+# Resources #
+#############
+
 Resources:
   customVPC:
     Type: AWS::EC2::VPC
@@ -12,7 +40,7 @@ Resources:
     Properties:
       VpcId:
         Ref: customVPC
-      CidrBlock: 10.0.0.0/23
+      CidrBlock: !FindInMap [subnetCidrMap, public, subnetA]
       AvailabilityZone: "ap-southeast-2a"
       Tags:
       - Key: Name
@@ -23,7 +51,7 @@ Resources:
     Properties:
       VpcId:
         Ref: customVPC
-      CidrBlock: 10.0.2.0/23
+      CidrBlock: !FindInMap [subnetCidrMap, public, subnetB]
       AvailabilityZone: "ap-southeast-2b"
       Tags:
       - Key: Name
@@ -34,7 +62,7 @@ Resources:
     Properties:
       VpcId:
         Ref: customVPC
-      CidrBlock: 10.0.4.0/23
+      CidrBlock: !FindInMap [subnetCidrMap, public, subnetC]
       AvailabilityZone: "ap-southeast-2c"
       Tags:
       - Key: Name
@@ -48,7 +76,7 @@ Resources:
     Properties:
       VpcId:
         Ref: customVPC
-      CidrBlock: 10.0.6.0/23
+      CidrBlock: !FindInMap [subnetCidrMap, app, subnetA]
       AvailabilityZone: "ap-southeast-2a"
       Tags:
       - Key: Name
@@ -59,7 +87,7 @@ Resources:
     Properties:
       VpcId:
         Ref: customVPC
-      CidrBlock: 10.0.8.0/23
+      CidrBlock: !FindInMap [subnetCidrMap, app, subnetB]
       AvailabilityZone: "ap-southeast-2b"
       Tags:
       - Key: Name
@@ -70,7 +98,7 @@ Resources:
     Properties:
       VpcId:
         Ref: customVPC
-      CidrBlock: 10.0.10.0/23
+      CidrBlock: !FindInMap [subnetCidrMap, app, subnetC]
       AvailabilityZone: "ap-southeast-2c"
       Tags:
       - Key: Name
@@ -83,7 +111,7 @@ Resources:
     Properties:
       VpcId:
         Ref: customVPC
-      CidrBlock: 10.0.12.0/23
+      CidrBlock: !FindInMap [subnetCidrMap, data, subnetA]
       AvailabilityZone: "ap-southeast-2a"
       Tags:
       - Key: Name
@@ -94,7 +122,7 @@ Resources:
     Properties:
       VpcId:
         Ref: customVPC
-      CidrBlock: 10.0.14.0/23
+      CidrBlock: !FindInMap [subnetCidrMap, data, subnetB]
       AvailabilityZone: "ap-southeast-2b"
       Tags:
       - Key: Name
@@ -105,7 +133,7 @@ Resources:
     Properties:
       VpcId:
         Ref: customVPC
-      CidrBlock: 10.0.16.0/23
+      CidrBlock: !FindInMap [subnetCidrMap, data, subnetC]
       AvailabilityZone: "ap-southeast-2c"
       Tags:
       - Key: Name
@@ -119,7 +147,7 @@ Resources:
     Properties:
       VpcId:
         Ref: customVPC
-      CidrBlock: 10.0.18.0/28
+      CidrBlock: !FindInMap [subnetCidrMap, nat, subnetA]
       AvailabilityZone: "ap-southeast-2a"
       Tags:
       - Key: Name
@@ -130,7 +158,7 @@ Resources:
     Properties:
       VpcId:
         Ref: customVPC
-      CidrBlock: 10.0.18.16/28
+      CidrBlock: !FindInMap [subnetCidrMap, nat, subnetB]
       AvailabilityZone: "ap-southeast-2b"
       Tags:
       - Key: Name
@@ -141,7 +169,7 @@ Resources:
     Properties:
       VpcId:
         Ref: customVPC
-      CidrBlock: 10.0.18.32/28
+      CidrBlock: !FindInMap [subnetCidrMap, nat, subnetC]
       AvailabilityZone: "ap-southeast-2c"
       Tags:
       - Key: Name
@@ -423,3 +451,80 @@ Resources:
     Properties: 
       RouteTableId: !Ref routeTableNat
       SubnetId: !Ref subnetNatC
+
+###########
+# Outputs #
+###########
+
+Outputs:
+#
+# VPC
+#
+  outputVPC:
+    Description: Reference VPC
+    Value: !Ref customVPC
+    Export:
+      Name: vpc-id
+
+#
+# Public subnets
+#
+  outputPublicSubnetA:
+    Description: Reference for public subnet A
+    Value: !Ref subnetPublicA
+    Export:
+      Name: subnet-id-public-a
+
+  outputPublicSubnetB:
+    Description: Reference for public subnet B
+    Value: !Ref subnetPublicB
+    Export:
+      Name: subnet-id-public-b
+
+  outputPublicSubnetC:
+    Description: Reference for public subnet C
+    Value: !Ref subnetPublicC
+    Export:
+      Name: subnet-id-public-c
+
+#
+# Application subnets
+#
+  outputAppSubnetA:
+    Description: Reference for app subnet A
+    Value: !Ref subnetAppA
+    Export:
+      Name: subnet-id-app-a
+
+  outputAppSubnetB:
+    Description: Reference for app subnet B
+    Value: !Ref subnetAppB
+    Export:
+      Name: subnet-id-app-b
+
+  outputAppSubnetC:
+    Description: Reference for app subnet C
+    Value: !Ref subnetAppC
+    Export:
+      Name: subnet-id-app-c
+
+#
+# Data subnets
+#
+  outputDataSubnetA:
+    Description: Reference for data subnet A
+    Value: !Ref subnetDataA
+    Export:
+      Name: subnet-id-data-a
+
+  outputDataSubnetB:
+    Description: Reference for data subnet B
+    Value: !Ref subnetDataB
+    Export:
+      Name: subnet-id-data-b
+
+  outputDataSubnetC:
+    Description: Reference for data subnet C
+    Value: !Ref subnetDataC
+    Export:
+      Name: subnet-id-data-c
