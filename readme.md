@@ -15,8 +15,6 @@ Last address:  10.0.31.254
 
 Each tier will have 3 subnets; one for each availability zone.
 
-Tier are:
-
 - Public
 - Application
 - Data
