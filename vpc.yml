@@ -7,21 +7,25 @@ AWSTemplateFormatVersion: '2010-09-09'
 Mappings:
   subnetCidrMap:
     public:
-      subnetA: "10.0.0.0/23"
-      subnetB: "10.0.2.0/23"
-      subnetC: "10.0.4.0/23"
+      subnetA:  "10.0.0.0/23"
+      subnetB:  "10.0.2.0/23"
+      subnetC:  "10.0.4.0/23"
+      reserved: "10.0.6.0/23"
     app:
-      subnetA: "10.0.6.0/23"
-      subnetB: "10.0.8.0/23"
-      subnetC: "10.0.10.0/23"
+      subnetA:  "10.0.8.0/23"
+      subnetB:  "10.0.10.0/23"
+      subnetC:  "10.0.12.0/23"
+      reserved: "10.0.14.0/23"
     data:
-      subnetA: "10.0.12.0/23"
-      subnetB: "10.0.14.0/23"
-      subnetC: "10.0.16.0/23"
+      subnetA:  "10.0.16.0/23"
+      subnetB:  "10.0.18.0/23"
+      subnetC:  "10.0.20.0/23"
+      reserved: "10.0.22.0/23"
     nat:
-      subnetA: "10.0.18.0/28"
-      subnetB: "10.0.18.16/28"
-      subnetC: "10.0.18.32/28"
+      subnetA:  "10.0.24.0/28"
+      subnetB:  "10.0.24.16/28"
+      subnetC:  "10.0.24.32/28"
+      reserved: "10.0.24.48/28"
 
 #############
 # Resources #
@@ -451,6 +455,11 @@ Resources:
     Properties: 
       RouteTableId: !Ref routeTableNat
       SubnetId: !Ref subnetNatC
+
+#
+# NACLs
+#
+
 
 ###########
 # Outputs #

@@ -111,6 +111,7 @@ Tier are:
 | pub-a: | 10.0.0.0/23 | 10.0.0.1 | 10.0.1.254 |
 | pub-b: | 10.0.2.0/23 | 10.0.2.1 | 10.0.3.254 |
 | pub-c: | 10.0.4.0/23 | 10.0.4.1 | 10.0.5.254 |
+| reserved: | 10.0.6.0/23 | 10.0.6.1 | 10.0.7.254 |
 
 ### App
 
@@ -118,9 +119,10 @@ IPs allocated: 1536
 
 | Name | CIDR | First address | Last address |
 | --- | --- | --- | --- |
-| app-a: | 10.0.6.0/23 | 10.0.6.1 | 10.0.7.254 |
-| app-b: | 10.0.8.0/23 | 10.0.8.1 | 10.0.9.254 |
-| app-c: | 10.0.10.0/23 | 10.0.10.1 | 10.0.11.254 |
+| app-a: | 10.0.8.0/23 | 10.0.8.1 | 10.0.9.254 |
+| app-b: | 10.0.10.0/23 | 10.0.10.1 | 10.0.11.254 |
+| app-c: | 10.0.12.0/23 | 10.0.12.1 | 10.0.13.254 |
+| reserved: | 10.0.14.0/23 | 10.0.14.1 | 10.15.254 |
 
 ### Data
 
@@ -128,9 +130,10 @@ IPs allocated: 1536
 
 | Name | CIDR | First address | Last address |
 | --- | --- | --- | --- |
-| data-a: | 10.0.12.0/23 | 10.0.12.1 | 10.0.13.254 |
-| data-b: | 10.0.14.0/23 | 10.0.14.1 | 10.0.15.254 |
-| data-c: | 10.0.16.0/23 | 10.0.16.1 | 10.0.17.254 |
+| data-a: | 10.0.16.0/23 | 10.0.16.1 | 10.0.17.254 |
+| data-b: | 10.0.18.0/23 | 10.0.18.1 | 10.0.19.254 |
+| data-c: | 10.0.20.0/23 | 10.0.20.1 | 10.0.21.254 |
+| reserved: | 10.0.22.0/23 | 10.0.22.1 | 10.23.254 |
 
 ### NAT
 
@@ -138,9 +141,10 @@ IPs allocated: 48
 
 | Name | CIDR | First address | Last address |
 | --- | --- | --- | --- |
-| nat-a: | 10.0.18.0/28 | 10.0.18.1 | 10.0.18.14 |
-| nat-b: | 10.0.18.16/28 | 10.0.18.17 | 10.0.18.30 |
-| nat-c: | 10.0.18.32/28 | 10.0.18.33 | 10.0.18.46 |
+| nat-a: | 10.0.24.0/28 | 10.0.24.1 | 10.0.24.14 |
+| nat-b: | 10.0.24.16/28 | 10.0.24.17 | 10.0.24.30 |
+| nat-c: | 10.0.24.32/28 | 10.0.24.33 | 10.0.24.46 |
+| reserved: | 10.0.24.48/28 | 10.0.24.48 | 10.24.62 |
 
 ## Route tables
 
@@ -228,12 +232,8 @@ Destination | Target |
 
 | Type | Port range | Source | Action | Description |
 | ---- | ---------- | ------ | ------ | ----------- |
-| Custom | all | 10.0.12.0/23 | Deny | Deny access from data tier |
-| Custom | all | 10.0.14.0/23 | Deny | Deny access from data tier |
-| Custom | all | 10.0.16.0/23 | Deny | Deny access from data tier |
-| Custom | all | 10.0.18.0/28 | Deny | Deny access from NAT tier |
-| Custom | all | 10.0.18.16/28 | Deny | Deny access from NAT tier |
-| Custom | all | 10.0.18.32/28 | Deny | Deny access from NAT tier |
+| Custom | all | 10.0.12.0/21 | Deny | Deny access from data tier |
+| Custom | all | 10.0.18.0/26 | Deny | Deny access from NAT tier |
 | HTTP | 80 | 0.0.0.0/0 | Accept | Accept all http traffic |
 | HTTPS | 443 | 0.0.0.0/0 | Accept | Accept all https traffic |
 | SSH | 22 | 0.0.0.0/0 | Accept | Accept all ssh traffic. <br/> Only required for jumpboxes |
@@ -243,12 +243,8 @@ Destination | Target |
 
 | Type | Port range | Source | Action | Description |
 | ---- | ---------- | ------ | ------ | ----------- |
-| Custom | all | 10.0.12.0/23 | Deny | Deny access to data tier |
-| Custom | all | 10.0.14.0/23 | Deny | Deny access to data tier |
-| Custom | all | 10.0.16.0/23 | Deny | Deny access to data tier |
-| Custom | all | 10.0.18.0/28 | Deny | Deny access to NAT tier |
-| Custom | all | 10.0.18.16/28 | Deny | Deny access to NAT tier |
-| Custom | all | 10.0.18.32/28 | Deny | Deny access to NAT tier |
+| Custom | all | 10.0.12.0/21 | Deny | Deny access to data tier |
+| Custom | all | 10.0.18.0/26 | Deny | Deny access to NAT tier |
 | Custom | all | 0.0.0.0/0 | Allow | Allow all traffic |
 | Custom | all | 0.0.0.0/0 | Deny | Deny all traffic |
 
@@ -279,9 +275,7 @@ Destination | Target |
 
 | Type | Port range | Source | Action | Description |
 | ---- | ---------- | ------ | ------ | ----------- |
-| Custom | all | 10.0.0.0/23 | Deny | Deny access from public tier |
-| Custom | all | 10.0.2.0/23 | Deny | Deny access from public tier |
-| Custom | all | 10.0.4.0/23 | Deny | Deny access from public tier |
+| Custom | all | 10.0.0.0/21 | Deny | Deny access from public tier |
 | Custom | all | 0.0.0.0/0 | Allow | Allow all traffic |
 | Custom | all | 0.0.0.0/0 | Deny | Deny all traffic |
 
@@ -289,9 +283,7 @@ Destination | Target |
 
 | Type | Port range | Source | Action | Description |
 | ---- | ---------- | ------ | ------ | ----------- |
-| Custom | all | 10.0.0.0/23 | Deny | Deny access to public tier |
-| Custom | all | 10.0.2.0/23 | Deny | Deny access to public tier |
-| Custom | all | 10.0.4.0/23 | Deny | Deny access to public tier |
+| Custom | all | 10.0.0.0/21 | Deny | Deny access to public tier |
 | Custom | all | 0.0.0.0/0 | Allow | Allow all traffic |
 | Custom | all | 0.0.0.0/0 | Deny | Deny all traffic |
 
@@ -304,9 +296,7 @@ Destination | Target |
 
 | Type | Port range | Source | Action | Description |
 | ---- | ---------- | ------ | ------ | ----------- |
-| Custom | all | 10.0.0.0/23 | Deny | Deny access to public tier |
-| Custom | all | 10.0.2.0/23 | Deny | Deny access to public tier |
-| Custom | all | 10.0.4.0/23 | Deny | Deny access to public tier |
+| Custom | all | 10.0.0.0/21 | Deny | Deny access to public tier |
 | HTTP | 80 | 0.0.0.0/0 | Allow | Accept all http traffic |
 | HTTPS | 443 | 0.0.0.0/0 | Allow | Accept all https traffic |
 | Custom | all | 0.0.0.0/0 | Deny | Deny all traffic |
@@ -315,8 +305,6 @@ Destination | Target |
 
 | Type | Port range | Source | Action | Description |
 | ---- | ---------- | ------ | ------ | ----------- |
-| Custom | all | 10.0.0.0/23 | Deny | Deny access to public tier |
-| Custom | all | 10.0.2.0/23 | Deny | Deny access to public tier |
-| Custom | all | 10.0.4.0/23 | Deny | Deny access to public tier |
+| Custom | all | 10.0.0.0/21 | Deny | Deny access to public tier |
 | Custom | all | 0.0.0.0/0 | Allow | Allow all traffic |
 | Custom | all | 0.0.0.0/0 | Deny | Deny all traffic |
