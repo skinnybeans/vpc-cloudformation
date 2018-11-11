@@ -226,24 +226,32 @@ Destination | Target |
 - Prevent subnets that shouldn't be communicating directly with the public tier.
 - Only permit incoming connections on desired ports.
 
+- Need to open ephermal ports inbound 1024-65535
+
 #### Inbound
+
+- Ephermal ports at top so response traffic for SSH into data tier will work.
 
 | Type | Port range | Source | Action | Description |
 | ---- | ---------- | ------ | ------ | ----------- |
-| Custom | all | 10.0.12.0/21 | Deny | Deny access from data tier |
 | Custom | all | 10.0.18.0/26 | Deny | Deny access from NAT tier |
-| HTTP | 80 | 0.0.0.0/0 | Accept | Accept all http traffic |
-| HTTPS | 443 | 0.0.0.0/0 | Accept | Accept all https traffic |
-| SSH | 22 | 0.0.0.0/0 | Accept | Accept all ssh traffic. <br/> Only required for jumpboxes |
+| TCP | 1024-65535 | Allow | ephermal ports for response traffic|
+| Custom | all | 10.0.12.0/21 | Deny | Deny access from data tier |
+| HTTP | 80 | 0.0.0.0/0 | Allow | Accept all http traffic |
+| HTTPS | 443 | 0.0.0.0/0 | Allow | Accept all https traffic |
+| SSH | 22 | 0.0.0.0/0 | Allow | Accept all ssh traffic. <br/> Only required for jumpboxes |
 | Custom | all | 0.0.0.0/0 | Deny | Deny all traffic |
 
 #### Outbound
 
 | Type | Port range | Source | Action | Description |
 | ---- | ---------- | ------ | ------ | ----------- |
-| Custom | all | 10.0.12.0/21 | Deny | Deny access to data tier |
 | Custom | all | 10.0.18.0/26 | Deny | Deny access to NAT tier |
-| Custom | all | 0.0.0.0/0 | Allow | Allow all traffic |
+| SSH | 22 | 0.0.0.0/0 | Allow | Allow SSH for jumpboxes |
+| Custom | all | 10.0.12.0/21 | Deny | Deny access to data tier |
+| HTTP | 80 | 0.0.0.0/0 | Allow | Allow HTTP traffic |
+| HTTPS | 443 | 0.0.0.0/0 | Allow | Allow HTTPS traffic |
+| TCP | 1024-65535 | 0.0.0.0/0 | Allow | Allow ephermal ports |
 | Custom | all | 0.0.0.0/0 | Deny | Deny all traffic |
 
 ### App
