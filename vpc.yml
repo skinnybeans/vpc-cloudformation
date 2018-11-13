@@ -30,6 +30,25 @@ Mappings:
       subnetC:  "10.0.24.32/28"
       reserved: "10.0.24.48/28"
       all:      "10.0.24.0/26"
+  portRangeMap:
+    http:
+      from: 80
+      to:   80
+    https:
+      from: 443
+      to:   443
+    ssh:
+      from: 22
+      to:   22
+    mysqlDefault:
+      from: 3306
+      to:   3306
+    ephemeral:
+      from: 1024
+      to:   65355
+    all:
+      from: 0
+      to:   65355
 
 #############
 # Resources #
@@ -501,8 +520,8 @@ Resources:
       Egress: false
       CidrBlock: !FindInMap [subnetCidrMap, nat, all]
       PortRange:
-        From: 0
-        To: 65535
+        From: !FindInMap [portRangeMap, all, from]
+        To: !FindInMap [portRangeMap, all, to]
 
   naclEntryPublicAllInEphemeral:
     Type: AWS::EC2::NetworkAclEntry
@@ -514,8 +533,8 @@ Resources:
       Egress: false
       CidrBlock: 0.0.0.0/0
       PortRange:
-        From: 1024
-        To: 65535
+        From: !FindInMap [portRangeMap, ephemeral, from]
+        To: !FindInMap [portRangeMap, ephemeral, to]
 
   naclEntryPublicDataInAll:
     Type: AWS::EC2::NetworkAclEntry
@@ -527,8 +546,8 @@ Resources:
       Egress: false
       CidrBlock: !FindInMap [subnetCidrMap, data, all]
       PortRange:
-        From: 0
-        To: 65535
+        From: !FindInMap [portRangeMap, all, from]
+        To: !FindInMap [portRangeMap, all, to]
 
   naclEntryPublicAllInHttp:
     Type: AWS::EC2::NetworkAclEntry
@@ -540,8 +559,8 @@ Resources:
       Egress: false
       CidrBlock: 0.0.0.0/0
       PortRange:
-        From: 80
-        To: 80
+        From: !FindInMap [portRangeMap, http, from]
+        To: !FindInMap [portRangeMap, http, to]
 
   naclEntryPublicAllInHttps:
     Type: AWS::EC2::NetworkAclEntry
@@ -553,8 +572,8 @@ Resources:
       Egress: false
       CidrBlock: 0.0.0.0/0
       PortRange:
-        From: 443
-        To: 443
+        From: !FindInMap [portRangeMap, https, from]
+        To: !FindInMap [portRangeMap, https, to]
 
   naclEntryPublicAllInSsh:
     Type: AWS::EC2::NetworkAclEntry
@@ -566,8 +585,8 @@ Resources:
       Egress: false
       CidrBlock: 0.0.0.0/0
       PortRange:
-        From: 22
-        To: 22
+        From: !FindInMap [portRangeMap, ssh, from]
+        To: !FindInMap [portRangeMap, ssh, to]
 
 # Public egress rules
 
@@ -581,8 +600,8 @@ Resources:
       Egress: true
       CidrBlock: !FindInMap [subnetCidrMap, nat, all]
       PortRange:
-        From: 0
-        To: 65535
+        From: !FindInMap [portRangeMap, all, from]
+        To: !FindInMap [portRangeMap, all, to]
 
   naclEntryPublicAllOutSsh:
     Type: AWS::EC2::NetworkAclEntry
@@ -594,8 +613,8 @@ Resources:
       Egress: true
       CidrBlock: 0.0.0.0/0
       PortRange:
-        From: 22
-        To: 22
+        From: !FindInMap [portRangeMap, ssh, from]
+        To: !FindInMap [portRangeMap, ssh, to]
 
   naclEntryPublicDataOutAll:
     Type: AWS::EC2::NetworkAclEntry
@@ -607,8 +626,8 @@ Resources:
       Egress: true
       CidrBlock: !FindInMap [subnetCidrMap, data, all]
       PortRange:
-        From: 0
-        To: 65535
+        From: !FindInMap [portRangeMap, all, from]
+        To: !FindInMap [portRangeMap, all, to]
 
   naclEntryPublicAllOutHttp:
     Type: AWS::EC2::NetworkAclEntry
@@ -620,8 +639,8 @@ Resources:
       Egress: true
       CidrBlock: 0.0.0.0/0
       PortRange:
-        From: 80
-        To: 80
+        From: !FindInMap [portRangeMap, http, from]
+        To: !FindInMap [portRangeMap, http, to]
 
   naclEntryPublicAllOutHttps:
     Type: AWS::EC2::NetworkAclEntry
@@ -633,8 +652,8 @@ Resources:
       Egress: true
       CidrBlock: 0.0.0.0/0
       PortRange:
-        From: 443
-        To: 443
+        From: !FindInMap [portRangeMap, https, from]
+        To: !FindInMap [portRangeMap, https, to]
 
   naclEntryPublicAllOutEphemeral:
     Type: AWS::EC2::NetworkAclEntry
@@ -646,8 +665,282 @@ Resources:
       Egress: true
       CidrBlock: 0.0.0.0/0
       PortRange:
-        From: 1024
-        To: 65535
+        From: !FindInMap [portRangeMap, ephemeral, from]
+        To: !FindInMap [portRangeMap, ephemeral, to]
+
+#
+# Application NACLs
+#
+  naclApp:
+    Type: AWS::EC2::NetworkAcl
+    Properties:
+      VpcId: !Ref customVPC
+      Tags:
+      - Key: Name
+        Value: nacl-app
+
+  naclSubetAssociationAppA:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      SubnetId: !Ref subnetAppA
+      NetworkAclId: !Ref naclApp
+
+  naclSubetAssociationAppB:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      SubnetId: !Ref subnetAppB
+      NetworkAclId: !Ref naclApp
+
+  naclSubetAssociationAppC:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      SubnetId: !Ref subnetAppC
+      NetworkAclId: !Ref naclApp
+
+# Application ingress rules
+
+  naclEntryAppInPublicSsh:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      NetworkAclId: !Ref naclApp
+      RuleNumber: 100
+      Protocol: 6   # TCP
+      RuleAction: allow
+      Egress: false
+      CidrBlock: !FindInMap [subnetCidrMap, public, all]
+      PortRange:
+        From: !FindInMap [portRangeMap, ssh, from]
+        To: !FindInMap [portRangeMap, ssh, to]
+
+  naclEntryAppInAllHttp:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      NetworkAclId: !Ref naclApp
+      RuleNumber: 200
+      Protocol: 6   # TCP
+      RuleAction: allow
+      Egress: false
+      CidrBlock: 0.0.0.0/0
+      PortRange:
+        From: !FindInMap [portRangeMap, http, from]
+        To: !FindInMap [portRangeMap, http, to]
+
+  naclEntryAppInAllHttps:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      NetworkAclId: !Ref naclApp
+      RuleNumber: 300
+      Protocol: 6   # TCP
+      RuleAction: allow
+      Egress: false
+      CidrBlock: 0.0.0.0/0
+      PortRange:
+        From: !FindInMap [portRangeMap, https, from]
+        To: !FindInMap [portRangeMap, https, to]
+
+  naclEntryAppInAllEphemeral:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      NetworkAclId: !Ref naclApp
+      RuleNumber: 400
+      Protocol: 6   # TCP
+      RuleAction: allow
+      Egress: false
+      CidrBlock: 0.0.0.0/0
+      PortRange:
+        From: !FindInMap [portRangeMap, ephemeral, from]
+        To: !FindInMap [portRangeMap, ephemeral, to]
+
+# Application egress rules
+
+  naclEntryAppOutAllHttp:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      NetworkAclId: !Ref naclApp
+      RuleNumber: 200
+      Protocol: 6   # TCP
+      RuleAction: allow
+      Egress: true
+      CidrBlock: 0.0.0.0/0
+      PortRange:
+        From: !FindInMap [portRangeMap, http, from]
+        To: !FindInMap [portRangeMap, http, to]
+
+  naclEntryAppOutAllHttps:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      NetworkAclId: !Ref naclApp
+      RuleNumber: 300
+      Protocol: 6   # TCP
+      RuleAction: allow
+      Egress: true
+      CidrBlock: 0.0.0.0/0
+      PortRange:
+        From: !FindInMap [portRangeMap, https, from]
+        To: !FindInMap [portRangeMap, https, to]
+
+  naclEntryAppOutAllEphemeral:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      NetworkAclId: !Ref naclApp
+      RuleNumber: 400
+      Protocol: 6   # TCP
+      RuleAction: allow
+      Egress: true
+      CidrBlock: 0.0.0.0/0
+      PortRange:
+        From: !FindInMap [portRangeMap, ephemeral, from]
+        To: !FindInMap [portRangeMap, ephemeral, to]
+
+#
+# Data NACLs
+#
+  naclData:
+    Type: AWS::EC2::NetworkAcl
+    Properties:
+      VpcId: !Ref customVPC
+      Tags:
+      - Key: Name
+        Value: nacl-data
+
+  naclSubetAssociationDataA:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      SubnetId: !Ref subnetDataA
+      NetworkAclId: !Ref naclData
+
+  naclSubetAssociationDataB:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      SubnetId: !Ref subnetDataB
+      NetworkAclId: !Ref naclData
+
+  naclSubetAssociationDataC:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      SubnetId: !Ref subnetDataC
+      NetworkAclId: !Ref naclData
+
+# Data ingress rules
+
+  naclEntryDataInPublicSsh:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      NetworkAclId: !Ref naclData
+      RuleNumber: 100
+      Protocol: 6   # TCP
+      RuleAction: allow
+      Egress: false
+      CidrBlock: !FindInMap [subnetCidrMap, public, all]
+      PortRange:
+        From: !FindInMap [portRangeMap, ssh, from]
+        To: !FindInMap [portRangeMap, ssh, to]
+
+  naclEntryDataInPublicAll:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      NetworkAclId: !Ref naclData
+      RuleNumber: 200
+      Protocol: -1   # All
+      RuleAction: deny
+      Egress: false
+      CidrBlock: !FindInMap [subnetCidrMap, public, all]
+      PortRange:
+        From: !FindInMap [portRangeMap, all, from]
+        To: !FindInMap [portRangeMap, all, to]
+
+  naclEntryDataInAppHttp:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      NetworkAclId: !Ref naclData
+      RuleNumber: 300
+      Protocol: 6   # TCP
+      RuleAction: allow
+      Egress: false
+      CidrBlock: !FindInMap [subnetCidrMap, app, all]
+      PortRange:
+        From: !FindInMap [portRangeMap, http, from]
+        To: !FindInMap [portRangeMap, http, to]
+
+  naclEntryDataInAppHttps:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      NetworkAclId: !Ref naclData
+      RuleNumber: 400
+      Protocol: 6   # TCP
+      RuleAction: allow
+      Egress: false
+      CidrBlock: !FindInMap [subnetCidrMap, app, all]
+      PortRange:
+        From: !FindInMap [portRangeMap, https, from]
+        To: !FindInMap [portRangeMap, https, to]
+
+  naclEntryDataInAppMysql:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      NetworkAclId: !Ref naclData
+      RuleNumber: 500
+      Protocol: 6   # TCP
+      RuleAction: allow
+      Egress: false
+      CidrBlock: !FindInMap [subnetCidrMap, app, all]
+      PortRange:
+        From: !FindInMap [portRangeMap, mysqlDefault, from]
+        To: !FindInMap [portRangeMap, mysqlDefault, to]
+
+  naclEntryDataInAllEphemeral:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      NetworkAclId: !Ref naclData
+      RuleNumber: 600
+      Protocol: 6   # TCP
+      RuleAction: allow
+      Egress: false
+      CidrBlock: 0.0.0.0/0
+      PortRange:
+        From: !FindInMap [portRangeMap, ephemeral, from]
+        To: !FindInMap [portRangeMap, ephemeral, to]
+
+# Data egress rules
+
+  naclEntryDataOutAllHttp:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      NetworkAclId: !Ref naclData
+      RuleNumber: 200
+      Protocol: 6   # TCP
+      RuleAction: allow
+      Egress: true
+      CidrBlock: 0.0.0.0/0
+      PortRange:
+        From: !FindInMap [portRangeMap, http, from]
+        To: !FindInMap [portRangeMap, http, to]
+
+  naclEntryDataOutAllHttps:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      NetworkAclId: !Ref naclData
+      RuleNumber: 300
+      Protocol: 6   # TCP
+      RuleAction: allow
+      Egress: true
+      CidrBlock: 0.0.0.0/0
+      PortRange:
+        From: !FindInMap [portRangeMap, https, from]
+        To: !FindInMap [portRangeMap, https, to]
+
+  naclEntryDataOutAllEphemeral:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      NetworkAclId: !Ref naclData
+      RuleNumber: 400
+      Protocol: 6   # TCP
+      RuleAction: allow
+      Egress: true
+      CidrBlock: 0.0.0.0/0
+      PortRange:
+        From: !FindInMap [portRangeMap, ephemeral, from]
+        To: !FindInMap [portRangeMap, ephemeral, to]
 
 ###########
 # Outputs #
