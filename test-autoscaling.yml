@@ -1,0 +1,88 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+# Extension of test-instances.yml
+# Creates autoscaling groups behind load balancers in each tier.
+# The autoscaling groups are spread across all three avaliblity zones in each tier.
+
+Resources:
+# General security group
+  SecurityGroupGeneral: 
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupDescription: "General group for testing"
+      SecurityGroupIngress:
+        - CidrIp: 0.0.0.0/0
+          Description: HTTP
+          FromPort: 80
+          ToPort: 80
+          IpProtocol: '6'
+        - CidrIp: 0.0.0.0/0
+          Description: HTTPS
+          FromPort: 443
+          ToPort: 443
+          IpProtocol: '6'
+        - CidrIp: 0.0.0.0/0
+          Description: SSH
+          FromPort: 22
+          ToPort: 22
+          IpProtocol: '6'
+      SecurityGroupEgress:
+        - CidrIp: 0.0.0.0/0
+          Description: ALL
+          FromPort: 0
+          ToPort: 65355
+          IpProtocol: '-1'
+      Tags:
+        - Key: Name
+          Value: SecurityGroupGeneral
+      VpcId: !ImportValue vpc-id
+
+# Public instances
+  LaunchConfigPublic:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Properties:
+      AssociatePublicIpAddress: true
+      ImageId: ami-0b8dea0e70b969adc
+      InstanceMonitoring: false
+      InstanceType: t2.micro
+      KeyName: MyEC2KeyPair
+      LaunchConfigurationName: LaunchConfigPublic
+      SecurityGroups:
+        - !Ref SecurityGroupGeneral
+      UserData: 
+        Fn::Base64: | 
+            #!/bin/bash
+            # Update packages
+            yum update -y
+            # Install apache web server
+            yum install httpd -y
+            # start the webserver
+            systemctl start httpd.service
+            # make sure webserver started when instance is restarted
+            systemctl enable httpd.service
+            # add some content to display that allows differentation between instances
+            echo "<h1>hello from webserver $(hostname)</h1>" > index.html
+            mv ./index.html /var/www/html/index.html
+
+  AutoScalingGroupPublic:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      AutoScalingGroupName: AutoScalingGroupPublic
+      AvailabilityZones:
+        - ap-southeast-2a
+        - ap-southeast-2b
+        - ap-southeast-2c
+      Cooldown: '300'
+      DesiredCapacity: '3'
+      MaxSize: '3'
+      MinSize: '3'
+      HealthCheckGracePeriod: 300
+      HealthCheckType: EC2
+      LaunchConfigurationName: !Ref LaunchConfigPublic
+      VPCZoneIdentifier:
+        - !ImportValue subnet-id-public-a
+        - !ImportValue subnet-id-public-b
+        - !ImportValue subnet-id-public-c
+
+
+  
