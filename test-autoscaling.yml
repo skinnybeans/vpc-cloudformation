@@ -10,22 +10,12 @@ Mappings:
       azB: 'ap-southeast-2b'
       azC: 'ap-southeast-2c'
 Resources:
-# General security group
-  securityGroupGeneral: 
+# Security group for SSH access only
+  securityGroupSsh: 
     Type: AWS::EC2::SecurityGroup
     Properties: 
-      GroupDescription: "General group for testing"
+      GroupDescription: "Security group for SSH access"
       SecurityGroupIngress:
-        - CidrIp: 0.0.0.0/0
-          Description: HTTP
-          FromPort: 80
-          ToPort: 80
-          IpProtocol: '6'
-        - CidrIp: 0.0.0.0/0
-          Description: HTTPS
-          FromPort: 443
-          ToPort: 443
-          IpProtocol: '6'
         - CidrIp: 0.0.0.0/0
           Description: SSH
           FromPort: 22
@@ -39,11 +29,65 @@ Resources:
           IpProtocol: '-1'
       Tags:
         - Key: Name
-          Value: SecurityGroupGeneral
+          Value: SecurityGroupSsh
       VpcId: !ImportValue vpc-id
 
-# Public instances
-  launchConfigPublic:
+  # Load balancer security group to allow incoming public traffic
+  securityGroupWebsiteLoadbalancer: 
+      Type: AWS::EC2::SecurityGroup
+      Properties: 
+        GroupDescription: "ALB security group"
+        SecurityGroupIngress:
+          - CidrIp: 0.0.0.0/0
+            Description: HTTP
+            FromPort: 80
+            ToPort: 80
+            IpProtocol: '6'
+          - CidrIp: 0.0.0.0/0
+            Description: HTTPS
+            FromPort: 443
+            ToPort: 443
+            IpProtocol: '6'
+        SecurityGroupEgress:
+          - CidrIp: 0.0.0.0/0
+            Description: ALL
+            FromPort: 0
+            ToPort: 65355
+            IpProtocol: '-1'
+        Tags:
+          - Key: Name
+            Value: SecurityGroupGeneral
+        VpcId: !ImportValue vpc-id
+
+  # Security group to allow load balancer access to the website EC2 instances
+  securityGroupWebsite: 
+      Type: AWS::EC2::SecurityGroup
+      Properties: 
+        GroupDescription: 'Website security group'
+        SecurityGroupEgress:
+          - CidrIp: 0.0.0.0/0
+            Description: ALL
+            FromPort: 0
+            ToPort: 65355
+            IpProtocol: '-1'
+        Tags:
+          - Key: Name
+            Value: SecurityGroupGeneral
+        VpcId: !ImportValue vpc-id
+
+  # Self referencing ingress rule for load balancer -> EC2 access
+  securityGroupIngressWebsite:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      Description: 'HTTP'
+      GroupId: !Ref securityGroupWebsite
+      IpProtocol: tcp
+      SourceSecurityGroupId: !Ref securityGroupWebsite
+      FromPort: 80
+      ToPort: 80
+
+# Website instances
+  launchConfigWebsite:
     Type: AWS::AutoScaling::LaunchConfiguration
     Properties:
       AssociatePublicIpAddress: true
@@ -51,9 +95,10 @@ Resources:
       InstanceMonitoring: false
       InstanceType: t2.micro
       KeyName: MyEC2KeyPair
-      LaunchConfigurationName: LaunchConfigPublic
+      LaunchConfigurationName: LaunchConfigWebsite
       SecurityGroups:
-        - !Ref securityGroupGeneral
+        - !Ref securityGroupWebsite
+        - !Ref securityGroupSsh
       UserData: 
         Fn::Base64: | 
             #!/bin/bash
@@ -69,10 +114,10 @@ Resources:
             echo "<h1>hello from webserver $(hostname)</h1>" > index.html
             mv ./index.html /var/www/html/index.html
 
-  autoScalingGroupPublic:
+  autoScalingGroupWebsite:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
-      AutoScalingGroupName: AutoScalingGroupPublic
+      AutoScalingGroupName: AutoScalingGroupWebsite
       AvailabilityZones:
         - !FindInMap [availabilityZoneMap, apSoutheast2a, azA]
         - !FindInMap [availabilityZoneMap, apSoutheast2a, azB]
@@ -83,30 +128,31 @@ Resources:
       MinSize: '3'
       HealthCheckGracePeriod: 300
       HealthCheckType: ELB
-      LaunchConfigurationName: !Ref launchConfigPublic
+      LaunchConfigurationName: !Ref launchConfigWebsite
       TargetGroupARNs:
-        - !Ref targetGroupPublic
+        - !Ref targetGroupWebsite
       VPCZoneIdentifier:
-        - !ImportValue subnet-id-public-a
-        - !ImportValue subnet-id-public-b
-        - !ImportValue subnet-id-public-c
+        - !ImportValue subnet-id-app-a
+        - !ImportValue subnet-id-app-b
+        - !ImportValue subnet-id-app-c
   
-  loadBalancerPublic:
+  loadBalancerWebsite:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
       Type: application
       Scheme: internet-facing
       SecurityGroups:
-        - !Ref securityGroupGeneral
+        - !Ref securityGroupWebsite
+        - !Ref securityGroupWebsiteLoadbalancer
       Subnets:
         - !ImportValue subnet-id-public-a
         - !ImportValue subnet-id-public-b
         - !ImportValue subnet-id-public-c
       Tags:
         - Key: Name
-          Value: LoadBalancerPublic
+          Value: loadBalancerWebsite
 
-  targetGroupPublic:
+  targetGroupWebsite:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
       HealthCheckIntervalSeconds: 300
@@ -118,19 +164,19 @@ Resources:
       UnhealthyThresholdCount: 2
       Matcher:
         HttpCode: '200'
-      Name: 'TargetGroupPublic'
+      Name: 'TargetGroupWebsite'
       Port: 80
       Protocol: HTTP
       TargetType: instance
       VpcId: !ImportValue vpc-id
 
-  loadBalancerListenerPublic:
+  loadBalancerListenerWebsite:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties: 
       DefaultActions:
         - Type: 'forward'
-          TargetGroupArn: !Ref targetGroupPublic
-      LoadBalancerArn: !Ref loadBalancerPublic
+          TargetGroupArn: !Ref targetGroupWebsite
+      LoadBalancerArn: !Ref loadBalancerWebsite
       Port: 80
       Protocol: 'HTTP'
 
