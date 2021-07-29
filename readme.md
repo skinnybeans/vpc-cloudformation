@@ -237,7 +237,7 @@ Destination | Target |
 | Type | Port range | Source | Action | Description |
 | ---- | ---------- | ------ | ------ | ----------- |
 | Custom | all | 10.0.18.0/26 | Deny | Deny access from NAT tier |
-| TCP | 1024-65535 | Allow | ephermal ports for response traffic|
+| TCP | 1024-65535 | 0.0.0.0/0 | Allow | ephermal ports for response traffic|
 | Custom | all | 10.0.12.0/21 | Deny | Deny access from data tier |
 | HTTP | 80 | 0.0.0.0/0 | Allow | Accept all http traffic |
 | HTTPS | 443 | 0.0.0.0/0 | Allow | Accept all https traffic |
